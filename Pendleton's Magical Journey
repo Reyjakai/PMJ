@@ -1,0 +1,330 @@
+;Pendleton's Magical Journey
+;Written by Adam Weaver.
+
+;This is supposed to be a choose your own adventure style game.
+;No telling how well it will actually go. Could be awful, likely is horribly unbalanced at best.
+;Well, can't win 'em all.
+
+;This is my introductory stuff. This should hopefully not break anything important.
+;R0 = Used for outputting text to the screen.
+;R1 = Holds my ASCII offset for now.
+;R2 = Holds my RNG for room picking.
+;R3 = Used temp.
+;R4 = Used temp.
+;R5 = Holds Player's Health.
+;R6 = Holds Room Number.
+;R7 = Nothing.
+
+
+;Start of code.
+.orig x3000
+
+Brnzp 	Start
+Intro1 .stringz "Welcome to Pendleton's Magical Journey!"
+Intro2 .stringz "\nYou have to make it through nine rooms to get through the dungeon.\nBeware of traps!"
+Intro3 .stringz "\nControls: Press any key to move into the next room.\n"
+
+;Clears all registers.
+
+Start
+	AND R0, R0, #0
+	AND R1, R1, #0
+	AND R2, R2, #0
+	AND R3, R3, #0
+	AND R4, R4, #0
+	AND R5, R5, #0
+	ADD R5, R5, #5
+	AND R6, R6, #0
+	AND R7, R7, #0
+
+	LEA R0 Intro1
+	PUTS
+
+	LEA R0 Intro2
+	PUTS
+
+	LEA R0 Intro3
+	PUTS
+
+;This is going to store all of the functions that eventually output.
+
+;Room number is 48 + current room number.
+RoomNum				;Called from NewRoom
+	LD R0, NewLine	
+	OUT
+	ADD R6, R6, #1		;Increments the room number. It starts at 0, so will need to be incremented.
+	ADD R7, R6, -10
+	BRz VICTORY
+	LEA R0, RoomText	;Loads the string for room.
+	PUTS
+	ADD R0, R6, #0		;Moves register 6 to register 0 for output.
+	LD R1, ASCIIOffset	;Loads ASCII offset to register 1
+	ADD R0, R0, R1		;Adds the ascii offset to the room number.
+	OUT	
+	LD R0, NewLine	
+	OUT
+	GETC
+	
+
+NewLine	.FILL #10
+
+Rando1	LD 	r1, num1	; Start counting down
+
+delay1	LDI  	R4, KBSRPtr	; See if key changed
+	BRn 	Rando2		; if so Branch to get number
+	add	r1, r1, #-1	; delay loop
+	BRzp	delay1
+	BRnzp 	Rando1; if not skip	
+
+num1	.FILL 	#19
+KBSRPtr .FILL 	xFE00
+KBDRPtr .FILL 	xFE02
+
+Rando2
+	LEA R0, RoomArray
+	ADD R0, R0, R1
+	LDR R0, R0, #0
+	JSRR R0
+	LEA R0, HealthText
+	PUTS
+	ADD R0, R5, #0
+	LD R1, ASCIIOffset
+	ADD R0, R0, R1
+	OUT
+	BRnzp RoomNum		;Branches after the room number loads.
+
+
+VICTORY
+	LEA r0, YouWin
+	PUTS
+	HALT
+DEFEAT
+	LEA R0, YouLose
+	PUTS
+	HALT
+YouWin	.stringz "\nYou win!"
+YouLose	.stringz "\nYou Lose!"
+	
+CheckHealth
+	ADD R5, R5, #0
+	BRnz DEFEAT
+	RET
+	
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;STRINGS AND OTHER FUNCTIONS;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;Offsets by 48.
+ASCIIOffset	.FILL #48
+
+;Strings.
+RoomText	.stringz "\nRoom: "
+HealthText	.stringz "\nHealth: "
+
+Str1Ptr		.FILL Room1s
+Str2Ptr		.FILL Room2s
+Str3Ptr		.FILL Room3s
+Str4Ptr		.FILL Room4s
+Str5Ptr		.FILL Room5s
+Str6Ptr		.FILL Room6s
+Str7Ptr		.FILL Room7s
+Str8Ptr		.FILL Room8s
+Str9Ptr		.FILL Room9s
+Str10Ptr	.FILL Room10s
+Str11Ptr	.FILL Room11s
+Str12Ptr	.FILL Room12s
+Str13Ptr	.FILL Room13s
+Str14Ptr	.FILL Room14s
+Str15Ptr	.FILL Room15s
+Str16Ptr	.FILL Room16s
+Str17Ptr	.FILL Room17s
+Str18Ptr	.FILL Room18s
+Str19Ptr	.FILL Room19s
+Str20Ptr	.FILL Room20s
+
+RoomArray
+	.FILL Room1
+	.FILL Room2
+	.FILL Room3
+	.FILL Room4
+	.FILL Room5
+	.FILL Room6
+	.FILL Room7
+	.FILL Room8
+	.FILL Room9
+	.FILL Room10
+	.FILL Room11
+	.FILL Room12
+	.FILL Room13
+	.FILL Room14
+	.FILL Room15
+	.FILL Room16
+	.FILL Room17
+	.FILL Room18
+	.FILL Room19
+	.FILL Room20
+
+Room1
+	LD R0, Str1Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	RET
+Room2
+	LD R0, Str2Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	RET
+Room3
+	LD R0, Str3Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	RET
+Room4
+	LD R0, Str4Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	RET
+Room5
+	LD R0, Str5Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	RET
+Room6
+	LD R0, Str6Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #1
+	RET
+Room7
+	LD R0, Str7Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #1
+	RET
+Room8
+	LD R0, Str8Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #1
+	RET
+Room9
+	LD R0, Str9Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #2
+	RET
+Room10
+	LD R0, Str10Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room11
+	LD R0, Str11Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room12
+	LD R0, Str12Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room13
+	LD R0, Str13Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room14
+	LD R0, Str14Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room15
+	LD R0, Str15Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room16
+	LD R0, Str16Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-2
+	BRnzp CheckHealth
+Room17
+	LD R0, Str17Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room18
+	LD R0, Str18Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+Room19
+	LD R0, Str19Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-3
+	BRnzp CheckHealth
+Room20
+	LD R0, Str20Ptr
+	ADD R3, R7, #0
+	PUTS
+	ADD R7, R3, #0
+	ADD R5, R5, #-1
+	BRnzp CheckHealth
+
+;Neutral Rooms.
+Room1s	.stringz "You enter an empty room.\nNothing happens."
+Room2s	.stringz "You enter a large, empty room.\nNothing happens."
+Room3s	.stringz "You enter a room and see a cute little rat.\nNothing happens."
+Room4s	.stringz "You enter a pitch black room. You stumble around, but make it all the way through unharmed.\nNothing happens."
+Room5s	.stringz "You enter a large, lavish room. All of the treasure is glued to the walls!\nNothing happens."
+;Good Rooms.
+Room6s	.stringz "You enter a large room with an old man inside.\nHe heals you by 1 point!"
+Room7s	.stringz "You enter a small room with a minature village inside!\nThey give you a health potion.\nYou heal by 1 point!"
+Room8s	.stringz "You enter a room and see a small pedestal. There is a health potion on top of it.\nYou heal by 1 point."
+Room9s	.stringz "You enter a room with a large health potion on the ground.\nYou heal by 2 points."
+;Bad Rooms.
+Room10s	.stringz "You enter a small room with a Giant Rat inside!\nYou take 1 damage."
+Room11s	.stringz "You enter a room and are attacked by a Wildebeast!\nYou take 1 damage."
+Room12s	.stringz "You enter a room and are attacked by a Giant badger!\nYou take 1 damage."
+Room13s	.stringz "You enter an empty room. You step on a trap!\nYou take 1 damage."
+Room14s	.stringz "You enter a large, empty room. You step on a trap!\nYou take 1 damage."
+Room15s	.stringz "You enter a room with an angry wizard inside!\nYou take 1 damage!"
+Room16s	.stringz "You enter a room with an angry feminist inside!\nYou take 2 damage!"
+Room17s	.stringz "You enter a room with your mother inside! You didn't clean your room!\nYou take 1 damage."
+Room18s	.stringz "You enter a plain room. You step on a gas trap on the floor!\nYou take 1 damage."
+Room19s	.stringz "You enter a lavish room with an angry dragon inside!\nYou take 3 damage!"
+Room20s	.stringz "You enter a spooky looking room. There is an angry bat inside!\nYou take 1 damage."
+
+	.END
